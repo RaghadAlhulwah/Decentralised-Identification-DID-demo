@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DID & VC Trust Flow - Enhanced for Clarity and Readability</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght=400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Styles remain similar for visual appeal and function */
+        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #d4d4d4; }
+        .accent-color { color: #ff20c9; }
+        .card { background-color: #161616; border: 1px solid #333; box-shadow: 0 4px 15px rgba(255, 32, 201, 0.05); }
+        .button-style { transition: all 0.15s ease-in-out; background-color: #222; border: 1px solid #ff20c9; color: #ff20c9; }
+        .button-style:hover:not(:disabled) { background-color: #ff20c9; color: #161616; box-shadow: 0 0 20px rgba(255, 32, 201, 0.5); transform: translateY(-2px); }
+        .button-style:disabled { opacity: 0.5; cursor: not-allowed; background-color: #222; border-color: #333; color: #888; }
+        .console-log { min-height: 150px; max-height: 300px; overflow-y: scroll; background-color: #000; border: 1px solid #333; font-family: 'Roboto Mono', monospace; font-size: 0.8rem; }
+        .status-success { color: #34d399; }
+        .status-error { color: #f87171; }
+        .status-highlight { color: #ffeb3b; }
+        .step-completed { background-color: rgba(255, 32, 201, 0.1); border-left: 4px solid #ff20c9; }
+        .jwt-header { color: #06b6d4; } /* Cyan */
+        .jwt-payload { color: #facc15; } /* Yellow */
+        .jwt-signature { color: #ef4444; } /* Red */
+        .tab-button.active { color: #ff20c9; border-bottom-color: #ff20c9; }
+        .tab-button { padding: 10px 15px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600; color: #a3a3a3; transition: color 0.2s, border-color 0.2s; }
+        .key-box { background-color: #222; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
+        .key-label { font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; }
+        .key-value { font-family: 'Roboto Mono', monospace; font-size: 0.75rem; color: #d4d4d4; word-break: break-all; }
+        .private-key-warning { color: #f87171; font-weight: 700; }
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="container mx-auto max-w-7xl">
+        <header class="text-center mb-10">
+            <h1 class="text-5xl font-extrabold text-white">
+                Enhanced DID & VC Trust Flow 🎓
+            </h1>
+            <p class="text-xl mt-2 text-gray-400">Deep dive into DID Generate, Publish, Resolve, and VC Verification.</p>
+        </header>
+
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div id="step-1" class="card p-6 rounded-xl transition-all">
+                <h2 class="text-2xl font-bold accent-color mb-4">1. DID GENERATE & Publish</h2>
+                <p class="mb-4 text-sm text-gray-400">The University creates keys and publishes its DID Document to the Registry.</p>
+                <button id="btn-create-dids" onclick="handleGenerateDidAndPublish()" class="button-style w-full py-2 rounded-lg font-semibold">
+                    <i class="fas fa-hammer mr-2"></i> GENERATE & Publish DID
+                </button>
+            </div>
+            <div id="step-2" class="card p-6 rounded-xl transition-all">
+                <h2 class="2xl font-bold accent-color mb-4">2. VC Issue & Sign</h2>
+                <p class="mb-4 text-sm text-gray-400">The University signs the data using its Private Key to create a VC (Digital Diploma).</p>
+                <button id="btn-issue-vc" onclick="handleIssueAndSignVC()" class="button-style w-full py-2 rounded-lg font-semibold" disabled>
+                    <i class="fas fa-file-signature mr-2"></i> Issue & Sign VC
+                </button>
+            </div>
+            <div id="step-3" class="card p-6 rounded-xl transition-all">
+                <h2 class="text-2xl font-bold accent-color mb-4">3. VC Present & DID RESOLVE</h2>
+                <p class="mb-4 text-sm text-gray-400">The Student shares the VC. The Verifier (Job Site) starts DID Resolution.</p>
+                <button id="btn-resolve-did" onclick="handleResolveDidAndPresentVC()" class="button-style w-full py-2 rounded-lg font-semibold" disabled>
+                    <i class="fas fa-network-wired mr-2"></i> RESOLVE DID & Present VC
+                </button>
+            </div>
+            <div id="step-4" class="card p-6 rounded-xl transition-all">
+                <h2 class="text-2xl font-bold accent-color mb-4">4. VC Verify</h2>
+                <p class="mb-4 text-sm text-gray-400">The Verifier checks the VC Signature against the Public Key from the DID Document.</p>
+                <button id="btn-verify-vc" onclick="handleVerifyVC()" class="button-style w-full py-2 rounded-lg font-semibold" disabled>
+                    <i class="fas fa-check-circle mr-2"></i> Verify Signature
+                </button>
+            </div>
+        </div>
+
+        <div class="card p-6 rounded-xl">
+            <div class="flex border-b border-gray-700">
+                <div id="tab-btn-registry" class="tab-button active" onclick="showTab('registry')">
+                    <i class="fas fa-database mr-2"></i> 1. DID Registry & Keys (Public Data)
+                </div>
+                <div id="tab-btn-wallet" class="tab-button" onclick="showTab('wallet')">
+                    <i class="fas fa-wallet mr-2"></i> 2. Holder's Wallet (VC)
+                </div>
+                <div id="tab-btn-console" class="tab-button" onclick="showTab('console')">
+                    <i class="fas fa-terminal mr-2"></i> 3. Verification Console
+                </div>
+            </div>
+
+            <div id="tab-registry" class="tab-content block">
+                <h3 class="text-xl font-bold text-white mt-4 mb-4">University Key & DID Document (Published Data)</h3>
+                
+                <div id="key-generation-container" class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="key-box">
+                        <p class="key-label accent-color">University DID (The Address)</p>
+                        <code id="issuer-did" class="key-value text-white">Awaiting Generation...</code>
+                    </div>
+                    <div class="key-box">
+                        <p class="key-label accent-color">University Public Key (The Fingerprint)</p>
+                        <code id="issuer-public-key" class="key-value text-white">Awaiting Generation...</code>
+                    </div>
+                    <div class="key-box">
+                        <p class="key-label accent-color">Student DID (The Holder)</p>
+                        <code id="holder-did" class="key-value text-white">Awaiting Generation...</code>
+                    </div>
+                    <div class="key-box">
+                        <p class="key-label accent-color private-key-warning">University Private Key (The Secret)</p>
+                        <code id="issuer-private-key" class="key-value text-red-400">HIDDEN AND NEVER SHARED (Simulation: Click 'GENERATE' to see)</code>
+                    </div>
+                </div>
+
+                <p class="text-sm font-semibold accent-color mb-2">Simulated DID Document (The public, on-chain record that is RESOLVED):</p>
+                <pre id="issuer-did-doc" class="console-log p-4 rounded-lg text-xs">
+{
+    "status": "Click 'GENERATE & Publish DID' to create and publish the DID Document."
+}</pre>
+            </div>
+
+            <div id="tab-wallet" class="tab-content hidden">
+                <h3 class="text-xl font-bold text-white mt-4 mb-4">Holder's Wallet: Verifiable Credential</h3>
+                <p class="text-sm font-semibold accent-color mb-2">VC (Digital Diploma) - Stored in JWT format:</p>
+                <div id="holder-vc-display" class="text-xs break-all text-gray-300 font-mono card p-4">Awaiting Credential Issuance...</div>
+                
+                <p class="text-sm font-semibold accent-color mt-6 mb-2">VC Payload (The Data Inside):</p>
+                <pre id="vc-payload-display" class="console-log p-4 rounded-lg text-xs">Awaiting Payload...</pre>
+            </div>
+
+            <div id="tab-console" class="tab-content hidden">
+                <h3 class="text-xl font-bold text-white mt-4 mb-4">Verification Console (<span class="text-gray-400">Job Site View</span>)</h3>
+                <div id="console" class="console-log p-4 rounded-lg text-sm">
+                    <p class="text-gray-500">Welcome to the Demo. Click "GENERATE & Publish DID" to start the flow.</p>
+                </div>
+            </div>
+
+            <button onclick="resetDemo()" class="w-full mt-4 py-2 rounded-lg text-sm text-gray-400 border border-gray-700 hover:bg-gray-700 transition">
+                <i class="fas fa-undo mr-2"></i> Reset Demo
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // ===============================================
+        //           I. DATA & STATE MANAGEMENT
+        // ===============================================
+
+        let state = {
+            issuerDID: null,
+            holderDID: null,
+            issuerPublicKey: null,
+            issuerPrivateKey: null,
+            holderVC: null, // JWT string
+            resolvedPublicKey: null, 
+        };
+
+        // ===============================================
+        //          II. CRYPTOGRAPHIC UTILITIES
+        // ===============================================
+
+        
+        const generateSimpleId = (prefix) => `${prefix}:example:${Math.random().toString(36).substring(2, 12)}...`;
+
+       
+        const generateSimpleKey = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + '...';
+
+        
+        const base64UrlEncode = (str) => {
+            return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        };
+
+        
+        const signCredential = (privateKey) => {
+            const header = { alg: 'ES256K', typ: 'jwt', kid: `${state.issuerDID}#keys-1` };
+            const payload = {
+                iss: state.issuerDID,
+                sub: state.holderDID,
+                nbf: Math.floor(Date.now() / 1000), 
+                vc: {
+                    '@context': ['https://www.w3.org/2018/credentials/v1'],
+                    type: ['VerifiableCredential', 'StudentStatus'],
+                    credentialSubject: {
+                        id: state.holderDID,
+                        name: 'Sarah M.', // اسم مفترض للطالبة
+                        major: 'B.S. Information Technology', 
+                        status: 'Enrolled - Year 3', // لم تتخرج بعد
+                        university: 'Decentralized Tech University'
+                    }
+                }
+            };
+            
+           
+            const headerBase64 = base64UrlEncode(JSON.stringify(header));
+            const payloadBase64 = base64UrlEncode(JSON.stringify(payload));
+            
+           
+            const signatureSeed = headerBase64 + payloadBase64 + privateKey;
+            const signature = 'CRYPTO_SIG_' + base64UrlEncode(signatureSeed).substring(0, 15);
+            
+            return {
+                jwt: `${headerBase64}.${payloadBase64}.${signature}`,
+                payload: payload
+            };
+        };
+
+        
+        const verifyCredential = (vc, publicKey) => {
+            try {
+                const parts = vc.split('.');
+                if (parts.length !== 3) return { valid: false, reason: "Malformed VC format (not a valid JWT structure)." };
+                
+                const headerBase64 = parts[0];
+                const payloadBase64 = parts[1];
+                const signature = parts[2];
+
+                // فك تشفير الحمولة (Payload)
+                const payload = JSON.parse(atob(payloadBase64 + '==='.slice((payloadBase64.length + 3) % 4)));
+                
+                // 1. التحقق من المُصدر (Issuer DID)
+                if (payload.iss !== state.issuerDID) return { valid: false, reason: "Issuer DID mismatch." };
+                
+                // 2. إعادة حساب التوقيع (Re-calculate Expected Signature) باستخدام المفتاح العام (Public Key)
+                const signatureSeed = headerBase64 + payloadBase64 + publicKey;
+                const expectedSignature = 'CRYPTO_SIG_' + base64UrlEncode(signatureSeed).substring(0, 15);
+
+                // 3. مقارنة التوقيع المُعاد حسابه بالتوقيع الأصلي
+                if (signature === expectedSignature) {
+                    return { valid: true, payload: payload };
+                } else {
+                    return { valid: false, reason: "Cryptographic signature failed validation (VC was tampered with or key is wrong)." };
+                }
+
+            } catch (e) {
+                return { valid: false, reason: `Parsing or decoding error: ${e.message}` };
+            }
+        };
+
+        // ===============================================
+        //        III. UI & LOGGING UTILITIES
+        // ===============================================
+
+        /**
+         * تسجيل رسالة في كونسول التحقق
+         * @param {string} message - الرسالة المراد تسجيلها.
+         * @param {string} status - نوع الحالة ('info', 'success', 'error', 'accent', 'highlight').
+         */
+        const log = (message, status = 'info') => {
+            showTab('console');
+            const consoleEl = document.getElementById('console');
+            let statusClass = 'text-gray-400';
+            if (status === 'success') statusClass = 'status-success';
+            if (status === 'error') statusClass = 'status-error';
+            if (status === 'accent') statusClass = 'accent-color';
+            if (status === 'highlight') statusClass = 'status-highlight';
+
+            const p = document.createElement('p');
+            p.className = statusClass + ' mb-1 leading-tight';
+            p.innerHTML = `&gt; ${message}`;
+            consoleEl.prepend(p);
+            consoleEl.scrollTop = 0;
+        };
+
+        // تبديل بين التبويبات (Tabs)
+        const showTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-btn-${tabId}`).classList.add('active');
+        };
+
+        // تحديث حالة الخطوة في واجهة المستخدم
+        const updateStepUI = (stepId, complete = false) => {
+            const stepEl = document.getElementById(stepId);
+            stepEl.classList.toggle('step-completed', complete);
+        };
+
+        // تمكين/تعطيل زر
+        const toggleButton = (id, enable) => {
+            document.getElementById(id).disabled = !enable;
+        };
+
+        // عرض الـ VC في تبويب المحفظة بشكل مُنظم (Header.Payload.Signature)
+        const renderVCDisplay = (vcData) => {
+            const vc = vcData ? vcData.jwt : null;
+            const payload = vcData ? vcData.payload : null;
+
+            if (!vc) {
+                document.getElementById('holder-vc-display').innerHTML = 'Awaiting Credential Issuance...';
+                document.getElementById('vc-payload-display').textContent = 'Awaiting Payload...';
+                return;
+            }
+            const parts = vc.split('.');
+            if (parts.length === 3) {
+                document.getElementById('holder-vc-display').innerHTML = `
+                    <span class="jwt-header" title="Header">${parts[0]}</span>.<span class="jwt-payload" title="Payload">${parts[1]}</span>.<span class="jwt-signature" title="Signature">${parts[2]}</span>
+                    <p class="mt-2 text-xs text-gray-500">Format: <span class="jwt-header">Header</span>.<span class="jwt-payload">Payload</span>.<span class="jwt-signature">Signature</span> (JWT)</p>
+                `;
+                document.getElementById('vc-payload-display').textContent = JSON.stringify(payload, null, 2);
+            } else {
+                document.getElementById('holder-vc-display').textContent = vc;
+                document.getElementById('vc-payload-display').textContent = 'Invalid VC format.';
+            }
+        }
+
+        // ===============================================
+        //          IV. DEMO FLOW HANDLERS
+        // ===============================================
+
+        /**
+         * خطوة 1: إنشاء DIDs والمفاتيح ونشر وثيقة DID.
+         */
+        function handleGenerateDidAndPublish() {
+            log('Starting Step 1: DID Publication...', 'accent');
+            
+            // 1. GENERATE Keys (إنشاء المفاتيح)
+            log(`ACTION: University GENERATES Cryptographic Key Pair (Public/Private).`, 'highlight');
+            state.issuerPublicKey = generateSimpleKey();
+            state.issuerPrivateKey = generateSimpleKey();
+            
+            // 2. GENERATE DIDs (إنشاء الهويات)
+            log(`ACTION: University GENERATES its Decentralized Identifier (DID).`, 'highlight');
+            state.issuerDID = generateSimpleId('did:uni');
+            state.holderDID = generateSimpleId('did:student');
+
+            // 3. Simulate Registry Publishing (محاكاة نشر وثيقة DID)
+            log('ACTION: University PUBLISHES the DID Document (containing Public Key) to the Registry.', 'info');
+            const didDocument = {
+                "@context": "https://www.w3.org/ns/did/v1",
+                "id": state.issuerDID,
+                "verificationMethod": [{
+                    "id": `${state.issuerDID}#keys-1`,
+                    "type": "Ed25519VerificationKey2018",
+                    "controller": state.issuerDID,
+                    "publicKeyBase58": state.issuerPublicKey 
+                }]
+            };
+
+            // تحديث واجهة تبويب السجل (Registry Tab)
+            document.getElementById('issuer-did-doc').textContent = JSON.stringify(didDocument, null, 2);
+            document.getElementById('issuer-did').textContent = state.issuerDID;
+            document.getElementById('issuer-public-key').textContent = state.issuerPublicKey;
+            document.getElementById('holder-did').textContent = state.holderDID;
+            document.getElementById('issuer-private-key').textContent = `[${state.issuerPrivateKey.substring(0, 15)}...] NEVER SHARED!`;
+
+            log(`University DID (${state.issuerDID}) successfully GENERATED and published.`, 'success');
+            
+            updateStepUI('step-1', true);
+            toggleButton('btn-create-dids', false);
+            toggleButton('btn-issue-vc', true);
+            showTab('registry');
+        }
+
+        /**
+         * خطوة 2: إصدار الـ VC والتوقيع عليها باستخدام المفتاح الخاص.
+         */
+        function handleIssueAndSignVC() {
+            if (!state.issuerDID) {
+                log('Error: Please create DIDs first.', 'error');
+                return;
+            }
+
+            log('Starting Step 2: Credential Issuance...', 'accent');
+            log(`ACTION: University ${state.issuerDID} uses its Private Key to sign the student data.`, 'info');
+
+            // 1. Issuer signs the VC using their private key
+            const vcData = signCredential(state.issuerPrivateKey);
+            state.holderVC = vcData.jwt;
+
+            // 2. VC is transferred and stored in the Holder's wallet
+            renderVCDisplay(vcData);
+            
+            log(`VC successfully signed and transferred to Holder's wallet.`, 'success');
+
+            updateStepUI('step-2', true);
+            toggleButton('btn-issue-vc', false);
+            toggleButton('btn-resolve-did', true);
+            showTab('wallet');
+        }
+
+       
+        function handleResolveDidAndPresentVC() {
+            if (!state.holderVC) {
+                log('Error: Wallet is empty. Please issue a VC first.', 'error');
+                return;
+            }
+
+            log('Starting Step 3: Presenting the Credential and DID Resolution...', 'accent');
+            
+            // Part A: Holder Presents VC
+            log(`ACTION: Student Sarah presents the signed VC (digital status card) to the Verifier.`, 'info');
+
+            // Part B: Verifier Resolves DID
+            log(`ACTION: Verifier extracts Issuer DID (${state.issuerDID}) from the VC payload.`, 'info');
+            log(`ACTION: Verifier begins DID RESOLUTION (querying the Registry) to find the public key...`, 'highlight');
+
+           
+            const resolvedDIDDocument = JSON.parse(document.getElementById('issuer-did-doc').textContent);
+            state.resolvedPublicKey = resolvedDIDDocument.verificationMethod[0].publicKeyBase58;
+
+            log(`DID RESOLVED successfully! Public Key fetched: ${state.resolvedPublicKey.substring(0, 15)}...`, 'success');
+            
+            updateStepUI('step-3', true);
+            toggleButton('btn-resolve-did', false);
+            toggleButton('btn-verify-vc', true);
+            showTab('console');
+        }
+
+        
+        function handleVerifyVC() {
+            if (!state.holderVC || !state.resolvedPublicKey) {
+                log('Error: Verification failed. VC not presented or DID not resolved.', 'error');
+                return;
+            }
+
+            log('Starting Step 4: Verification by Verifier (Job Site)...', 'accent');
+            log(`ACTION: Verifier compares the VC Signature using the RESOLVED Public Key.`, 'info');
+
+            // 1. Verification happens!
+            const verificationResult = verifyCredential(state.holderVC, state.resolvedPublicKey);
+
+            // 2. Report Results
+            if (verificationResult.valid) {
+                log(`Verification SUCCESS! Signature is valid.`, 'success');
+                log(`[PROOF] The VC is authentic, created by the University, and untampered.`, 'success');
+                log(`Verified Subject: ${verificationResult.payload.vc.credentialSubject.name} | Major: ${verificationResult.payload.vc.credentialSubject.major} | Status: ${verificationResult.payload.vc.credentialSubject.status}`, 'info');
+            } else {
+                log(`Verification FAILED! Reason: ${verificationResult.reason}`, 'error');
+                log(`[SECURITY] This credential may be fraudulent or expired.`, 'error');
+            }
+
+            updateStepUI('step-4', verificationResult.valid);
+            toggleButton('btn-verify-vc', false);
+            log('DEMO COMPLETE.', 'accent');
+        }
+
+        // ===============================================
+        //            V. RESET FUNCTION
+        // ===============================================
+
+        function resetDemo() {
+           
+            state = {
+                issuerDID: null,
+                holderDID: null,
+                issuerPublicKey: null,
+                issuerPrivateKey: null,
+                holderVC: null,
+                resolvedPublicKey: null,
+            };
+            
+            // تحديث واجهة المستخدم إلى الحالة الأولية
+            document.getElementById('issuer-did-doc').textContent = '{"status": "Click \'GENERATE & Publish DID\' to create and publish the DID Document."}';
+            document.getElementById('issuer-did').textContent = 'Awaiting Generation...';
+            document.getElementById('issuer-public-key').textContent = 'Awaiting Generation...';
+            document.getElementById('holder-did').textContent = 'Awaiting Generation...';
+            document.getElementById('issuer-private-key').textContent = `HIDDEN AND NEVER SHARED (Simulation: Click 'GENERATE' to see)`;
+
+            renderVCDisplay(null);
+            document.getElementById('console').innerHTML = '<p class="text-gray-500">Welcome to the Demo. Click "GENERATE & Publish DID" to start the flow.</p>';
+
+            // إعادة ضبط ألوان الخطوات وحالة الأزرار
+            updateStepUI('step-1', false);
+            updateStepUI('step-2', false);
+            updateStepUI('step-3', false);
+            updateStepUI('step-4', false);
+            
+            toggleButton('btn-create-dids', true);
+            toggleButton('btn-issue-vc', false);
+            toggleButton('btn-resolve-did', false);
+            toggleButton('btn-verify-vc', false);
+
+            log('Demo state reset. Ready to start.', 'info');
+            showTab('registry');
+        }
+
+        // Initialize on load
+        window.onload = resetDemo;
+        
+    </script>
+</body>
+</html>
