@@ -10,9 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        
         /* ================================================= */
         /* === 1. GENERAL LAYOUT & FONT SIZES (Enhanced) === */
         /* ================================================= */
+
+        
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f7f7f7; /* Light Background */
@@ -130,7 +133,7 @@
     <div class="container mx-auto max-w-7xl">
         <header class="text-center mb-10">
             <h1 class="text-5xl font-extrabold text-gray-900">
-                Enhanced DID & VC Trust Flow 🎓
+                Enhanced DID & VC Trust Flow
             </h1>
             <p class="text-xl mt-2 text-gray-600">Deep dive into DID Generate, Publish, Resolve, and VC Verification.</p>
         </header>
@@ -237,37 +240,29 @@
         //           I. DATA & STATE MANAGEMENT
         // ===============================================
 
-        // تجميع كل المتغيرات في كائن واحد (state) لسهولة الإدارة
+    
         let state = {
             issuerDID: null,
             holderDID: null,
             issuerPublicKey: null,
             issuerPrivateKey: null,
             holderVC: null, // JWT string
-            resolvedPublicKey: null, // المفتاح العام الذي يحصل عليه المدقق عبر Resolution
+            resolvedPublicKey: null, 
         };
 
         // ===============================================
         //          II. CRYPTOGRAPHIC UTILITIES
         // ===============================================
 
-        // دالة مساعدة لإنشاء معرفات عشوائية قصيرة (محاكاة DID)
         const generateSimpleId = (prefix) => `${prefix}:example:${Math.random().toString(36).substring(2, 12)}...`;
 
-        // دالة مساعدة لإنشاء مفتاح عشوائي طويل (محاكاة Key)
         const generateSimpleKey = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + '...';
 
-        // Base64Url Encode (تشفير آمن للعناوين)
         const base64UrlEncode = (str) => {
             return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
         };
 
-        /**
-         * محاكاة توقيع الشهادة (VC) باستخدام مفتاح المُصدر الخاص.
-         * تم تعديل حمولة البيانات هنا لتعكس طلب المستخدم (بنت IT لم تتخرج).
-         * @param {string} privateKey - المفتاح الخاص للجامعة.
-         * @returns {{jwt: string, payload: object}} الـ VC الموقعة وحمولة البيانات.
-         */
+
         const signCredential = (privateKey) => {
             const header = { alg: 'ES256K', typ: 'jwt', kid: `${state.issuerDID}#keys-1` };
             const payload = {
@@ -276,22 +271,20 @@
                 nbf: Math.floor(Date.now() / 1000), 
                 vc: {
                     '@context': ['https://www.w3.org/2018/credentials/v1'],
-                    type: ['VerifiableCredential', 'StudentStatus'], // تم تغيير النوع ليناسب حالة عدم التخرج
+                    type: ['VerifiableCredential', 'StudentStatus'], 
                     credentialSubject: {
                         id: state.holderDID,
-                        name: 'Sarah M.', // اسم مفترض للطالبة
-                        major: 'B.S. Information Technology', // تخصص تكنولوجيا المعلومات
-                        status: 'Enrolled - Year 3', // لم تتخرج بعد
-                        university: 'Decentralized Tech University'
+                        name: 'Raghad A.', 
+                        major: 'B.S. Information Technology', 
+                        status: 'Enrolled - Year 3', 
+                        university: 'King Saud University'
                     }
                 }
             };
             
-            // 1. تشفير Header و Payload
             const headerBase64 = base64UrlEncode(JSON.stringify(header));
             const payloadBase64 = base64UrlEncode(JSON.stringify(payload));
             
-            // 2. حساب التوقيع (Signature) باستخدام المفتاح الخاص (Private Key)
             const signatureSeed = headerBase64 + payloadBase64 + privateKey;
             const signature = 'CRYPTO_SIG_' + base64UrlEncode(signatureSeed).substring(0, 15);
             
@@ -301,11 +294,7 @@
             };
         };
 
-        /**
-         * محاكاة التحقق من صحة الشهادة (VC) باستخدام المفتاح العام المُحلول.
-         * @param {string} vc - الـ VC الموقعة (JWT).
-         * @param {string} publicKey - المفتاح العام المُحلول (Resolved Public Key).
-         */
+      
         const verifyCredential = (vc, publicKey) => {
             try {
                 const parts = vc.split('.');
@@ -315,17 +304,13 @@
                 const payloadBase64 = parts[1];
                 const signature = parts[2];
 
-                // فك تشفير الحمولة (Payload)
                 const payload = JSON.parse(atob(payloadBase64 + '==='.slice((payloadBase64.length + 3) % 4)));
                 
-                // 1. التحقق من المُصدر (Issuer DID)
                 if (payload.iss !== state.issuerDID) return { valid: false, reason: "Issuer DID mismatch." };
                 
-                // 2. إعادة حساب التوقيع (Re-calculate Expected Signature) باستخدام المفتاح العام (Public Key)
                 const signatureSeed = headerBase64 + payloadBase64 + publicKey;
                 const expectedSignature = 'CRYPTO_SIG_' + base64UrlEncode(signatureSeed).substring(0, 15);
 
-                // 3. مقارنة التوقيع المُعاد حسابه بالتوقيع الأصلي
                 if (signature === expectedSignature) {
                     return { valid: true, payload: payload };
                 } else {
@@ -341,11 +326,7 @@
         //        III. UI & LOGGING UTILITIES
         // ===============================================
 
-        /**
-         * تسجيل رسالة في كونسول التحقق
-         * @param {string} message - الرسالة المراد تسجيلها.
-         * @param {string} status - نوع الحالة ('info', 'success', 'error', 'accent', 'highlight').
-         */
+     
         const log = (message, status = 'info') => {
             showTab('console');
             const consoleEl = document.getElementById('console');
@@ -362,7 +343,6 @@
             consoleEl.scrollTop = 0;
         };
 
-        // تبديل بين التبويبات (Tabs)
         const showTab = (tabId) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
@@ -371,18 +351,15 @@
             document.getElementById(`tab-btn-${tabId}`).classList.add('active');
         };
 
-        // تحديث حالة الخطوة في واجهة المستخدم
         const updateStepUI = (stepId, complete = false) => {
             const stepEl = document.getElementById(stepId);
             stepEl.classList.toggle('step-completed', complete);
         };
 
-        // تمكين/تعطيل زر
         const toggleButton = (id, enable) => {
             document.getElementById(id).disabled = !enable;
         };
 
-        // عرض الـ VC في تبويب المحفظة بشكل مُنظم (Header.Payload.Signature)
         const renderVCDisplay = (vcData) => {
             const vc = vcData ? vcData.jwt : null;
             const payload = vcData ? vcData.payload : null;
@@ -409,23 +386,18 @@
         //          IV. DEMO FLOW HANDLERS
         // ===============================================
 
-        /**
-         * خطوة 1: إنشاء DIDs والمفاتيح ونشر وثيقة DID.
-         */
+        
         function handleGenerateDidAndPublish() {
             log('Starting Step 1: DID Publication...', 'accent');
             
-            // 1. GENERATE Keys (إنشاء المفاتيح)
             log(`ACTION: University GENERATES Cryptographic Key Pair (Public/Private).`, 'highlight');
             state.issuerPublicKey = generateSimpleKey();
             state.issuerPrivateKey = generateSimpleKey();
             
-            // 2. GENERATE DIDs (إنشاء الهويات)
             log(`ACTION: University GENERATES its Decentralized Identifier (DID).`, 'highlight');
             state.issuerDID = generateSimpleId('did:uni');
             state.holderDID = generateSimpleId('did:student');
 
-            // 3. Simulate Registry Publishing (محاكاة نشر وثيقة DID)
             log('ACTION: University PUBLISHES the DID Document (containing Public Key) to the Registry.', 'info');
             const didDocument = {
                 "@context": "https://www.w3.org/ns/did/v1",
@@ -438,7 +410,6 @@
                 }]
             };
 
-            // تحديث واجهة تبويب السجل (Registry Tab)
             document.getElementById('issuer-did-doc').textContent = JSON.stringify(didDocument, null, 2);
             document.getElementById('issuer-did').textContent = state.issuerDID;
             document.getElementById('issuer-public-key').textContent = state.issuerPublicKey;
@@ -453,9 +424,7 @@
             showTab('registry');
         }
 
-        /**
-         * خطوة 2: إصدار الـ VC والتوقيع عليها باستخدام المفتاح الخاص.
-         */
+       
         function handleIssueAndSignVC() {
             if (!state.issuerDID) {
                 log('Error: Please create DIDs first.', 'error');
@@ -480,9 +449,7 @@
             showTab('wallet');
         }
 
-        /**
-         * خطوة 3: تقديم الـ VC وبدء عملية حل الـ DID (Resolution).
-         */
+       
         function handleResolveDidAndPresentVC() {
             if (!state.holderVC) {
                 log('Error: Wallet is empty. Please issue a VC first.', 'error');
@@ -498,7 +465,6 @@
             log(`ACTION: Verifier extracts Issuer DID (${state.issuerDID}) from the VC payload.`, 'info');
             log(`ACTION: Verifier begins DID RESOLUTION (querying the Registry) to find the public key...`, 'highlight');
 
-            // محاكاة حل الـ DID (Fetching the DID Document)
             const resolvedDIDDocument = JSON.parse(document.getElementById('issuer-did-doc').textContent);
             state.resolvedPublicKey = resolvedDIDDocument.verificationMethod[0].publicKeyBase58;
 
@@ -510,9 +476,7 @@
             showTab('console');
         }
 
-        /**
-         * خطوة 4: التحقق من التوقيع باستخدام المفتاح العام المُحلول.
-         */
+        
         function handleVerifyVC() {
             if (!state.holderVC || !state.resolvedPublicKey) {
                 log('Error: Verification failed. VC not presented or DID not resolved.', 'error');
@@ -545,7 +509,7 @@
         // ===============================================
 
         function resetDemo() {
-            // إعادة ضبط كائن الحالة
+
             state = {
                 issuerDID: null,
                 holderDID: null,
@@ -555,7 +519,7 @@
                 resolvedPublicKey: null,
             };
             
-            // تحديث واجهة المستخدم إلى الحالة الأولية
+            
             document.getElementById('issuer-did-doc').textContent = '{"status": "Click \'GENERATE & Publish DID\' to create and publish the DID Document."}';
             document.getElementById('issuer-did').textContent = 'Awaiting Generation...';
             document.getElementById('issuer-public-key').textContent = 'Awaiting Generation...';
@@ -565,7 +529,7 @@
             renderVCDisplay(null);
             document.getElementById('console').innerHTML = '<p class="text-gray-500">Welcome to the Demo. Click "GENERATE & Publish DID" to start the flow.</p>';
 
-            // إعادة ضبط ألوان الخطوات وحالة الأزرار
+            
             updateStepUI('step-1', false);
             updateStepUI('step-2', false);
             updateStepUI('step-3', false);
