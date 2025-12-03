@@ -3,72 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DID & VC Trust Flow - Enhanced for Clarity and Readability</title>
+    <title>DID & VC Trust Flow - Enhanced Readability (Light Theme)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght=400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* Styles remain similar for visual appeal and function */
-        body { font-family: 'Inter', sans-serif; background-color: #0a0a0a; color: #d4d4d4; }
-        .accent-color { color: #ff20c9; }
-        .card { background-color: #161616; border: 1px solid #333; box-shadow: 0 4px 15px rgba(255, 32, 201, 0.05); }
-        .button-style { transition: all 0.15s ease-in-out; background-color: #222; border: 1px solid #ff20c9; color: #ff20c9; }
-        .button-style:hover:not(:disabled) { background-color: #ff20c9; color: #161616; box-shadow: 0 0 20px rgba(255, 32, 201, 0.5); transform: translateY(-2px); }
-        .button-style:disabled { opacity: 0.5; cursor: not-allowed; background-color: #222; border-color: #333; color: #888; }
-        .console-log { min-height: 150px; max-height: 300px; overflow-y: scroll; background-color: #000; border: 1px solid #333; font-family: 'Roboto Mono', monospace; font-size: 0.8rem; }
-        .status-success { color: #34d399; }
-        .status-error { color: #f87171; }
-        .status-highlight { color: #ffeb3b; }
-        .step-completed { background-color: rgba(255, 32, 201, 0.1); border-left: 4px solid #ff20c9; }
-        .jwt-header { color: #06b6d4; } /* Cyan */
-        .jwt-payload { color: #facc15; } /* Yellow */
-        .jwt-signature { color: #ef4444; } /* Red */
-        .tab-button.active { color: #ff20c9; border-bottom-color: #ff20c9; }
-        .tab-button { padding: 10px 15px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600; color: #a3a3a3; transition: color 0.2s, border-color 0.2s; }
-        .key-box { background-color: #222; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
-        .key-label { font-size: 0.9rem; font-weight: 700; margin-bottom: 5px; }
-        .key-value { font-family: 'Roboto Mono', monospace; font-size: 0.75rem; color: #d4d4d4; word-break: break-all; }
-        .private-key-warning { color: #f87171; font-weight: 700; }
+        /* ================================================= */
+        /* === 1. GENERAL LAYOUT & FONT SIZES (Enhanced) === */
+        /* ================================================= */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7; /* Light Background */
+            color: #1a1a1a; /* Dark Text */
+            line-height: 1.6;
+        }
+        .container {
+            min-height: 100vh;
+        }
+        .accent-color {
+            color: #0d9488; /* Teal/Cyan accent for high visibility */
+        }
+        .card {
+            background-color: #ffffff; /* White Card Background */
+            border: 1px solid #e0e0e0; /* Light Border */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Typography adjustments */
+        h1 { font-size: 3rem; color: #1a1a1a; } /* Main title is larger */
+        h2 { font-size: 1.6rem; font-weight: 700; } /* Step titles are clear */
+        p.text-sm { font-size: 0.95rem; } /* Description text is slightly larger */
+
+        /* ================================================= */
+        /* === 2. BUTTONS & INTERACTIVE ELEMENTS (Accent) === */
+        /* ================================================= */
+        .button-style {
+            transition: all 0.15s ease-in-out;
+            background-color: #fff;
+            border: 2px solid #0d9488; /* Teal border */
+            color: #0d9488;
+            font-weight: 600;
+        }
+        .button-style:hover:not(:disabled) {
+            background-color: #0d9488;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(13, 148, 136, 0.4);
+            transform: translateY(-1px);
+        }
+        .button-style:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background-color: #f0f0f0;
+            border-color: #ccc;
+            color: #888;
+        }
+        .step-completed {
+            background-color: rgba(13, 148, 136, 0.1); /* Light teal background */
+            border-left: 5px solid #0d9488;
+        }
+        
+        /* ================================================= */
+        /* === 3. CONSOLE & CODE DISPLAY (High Contrast) === */
+        /* ================================================= */
+        .console-log {
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: scroll;
+            background-color: #fff; /* White console background */
+            border: 1px solid #ddd;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9rem; /* Increased console font size */
+            color: #333; /* Darker console text */
+        }
+        .status-success { color: #10b981; } /* Emerald Green */
+        .status-error { color: #ef4444; } /* Red */
+        .status-highlight { color: #f59e0b; } /* Amber Yellow */
+        
+        /* Key Display Boxes */
+        .key-box {
+            background-color: #f0f8ff; /* Very light blue/cyan for key boxes */
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #d0e8ff;
+            margin-bottom: 10px;
+        }
+        .key-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .key-value {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.8rem; /* Slightly increased key value size */
+            color: #333;
+            word-break: break-all;
+        }
+        .private-key-warning {
+            color: #ef4444;
+            font-weight: 700;
+        }
+        
+        /* JWT Highlighting */
+        .jwt-header { color: #0891b2; } /* Cyan */
+        .jwt-payload { color: #d97706; } /* Orange */
+        .jwt-signature { color: #dc2626; } /* Strong Red */
+        
+        /* Tabs Styling */
+        .tab-button {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 600;
+            color: #666;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .tab-button.active {
+            color: #0d9488;
+            border-bottom-color: #0d9488;
+        }
     </style>
 </head>
 <body class="p-8">
 
     <div class="container mx-auto max-w-7xl">
         <header class="text-center mb-10">
-            <h1 class="text-5xl font-extrabold text-white">
+            <h1 class="text-5xl font-extrabold text-gray-900">
                 Enhanced DID & VC Trust Flow 🎓
             </h1>
-            <p class="text-xl mt-2 text-gray-400">Deep dive into DID Generate, Publish, Resolve, and VC Verification.</p>
+            <p class="text-xl mt-2 text-gray-600">Deep dive into DID Generate, Publish, Resolve, and VC Verification.</p>
         </header>
 
         
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
             <div id="step-1" class="card p-6 rounded-xl transition-all">
                 <h2 class="text-2xl font-bold accent-color mb-4">1. DID GENERATE & Publish</h2>
-                <p class="mb-4 text-sm text-gray-400">The University creates keys and publishes its DID Document to the Registry.</p>
+                <p class="mb-4 text-sm text-gray-600">The University creates keys and publishes its DID Document to the Registry.</p>
                 <button id="btn-create-dids" onclick="handleGenerateDidAndPublish()" class="button-style w-full py-2 rounded-lg font-semibold">
                     <i class="fas fa-hammer mr-2"></i> GENERATE & Publish DID
                 </button>
             </div>
             <div id="step-2" class="card p-6 rounded-xl transition-all">
                 <h2 class="2xl font-bold accent-color mb-4">2. VC Issue & Sign</h2>
-                <p class="mb-4 text-sm text-gray-400">The University signs the data using its Private Key to create a VC (Digital Diploma).</p>
+                <p class="mb-4 text-sm text-gray-600">The University signs the data using its Private Key to create a VC (Digital Diploma).</p>
                 <button id="btn-issue-vc" onclick="handleIssueAndSignVC()" class="button-style w-full py-2 rounded-lg font-semibold" disabled>
                     <i class="fas fa-file-signature mr-2"></i> Issue & Sign VC
                 </button>
             </div>
             <div id="step-3" class="card p-6 rounded-xl transition-all">
                 <h2 class="text-2xl font-bold accent-color mb-4">3. VC Present & DID RESOLVE</h2>
-                <p class="mb-4 text-sm text-gray-400">The Student shares the VC. The Verifier (Job Site) starts DID Resolution.</p>
+                <p class="mb-4 text-sm text-gray-600">The Student shares the VC. The Verifier (Job Site) starts DID Resolution.</p>
                 <button id="btn-resolve-did" onclick="handleResolveDidAndPresentVC()" class="button-style w-full py-2 rounded-lg font-semibold" disabled>
                     <i class="fas fa-network-wired mr-2"></i> RESOLVE DID & Present VC
                 </button>
             </div>
             <div id="step-4" class="card p-6 rounded-xl transition-all">
                 <h2 class="text-2xl font-bold accent-color mb-4">4. VC Verify</h2>
-                <p class="mb-4 text-sm text-gray-400">The Verifier checks the VC Signature against the Public Key from the DID Document.</p>
+                <p class="mb-4 text-sm text-gray-600">The Verifier checks the VC Signature against the Public Key from the DID Document.</p>
                 <button id="btn-verify-vc" onclick="handleVerifyVC()" class="button-style w-full py-2 rounded-lg font-semibold" disabled>
                     <i class="fas fa-check-circle mr-2"></i> Verify Signature
                 </button>
@@ -76,7 +168,7 @@
         </div>
 
         <div class="card p-6 rounded-xl">
-            <div class="flex border-b border-gray-700">
+            <div class="flex border-b border-gray-300">
                 <div id="tab-btn-registry" class="tab-button active" onclick="showTab('registry')">
                     <i class="fas fa-database mr-2"></i> 1. DID Registry & Keys (Public Data)
                 </div>
@@ -89,51 +181,51 @@
             </div>
 
             <div id="tab-registry" class="tab-content block">
-                <h3 class="text-xl font-bold text-white mt-4 mb-4">University Key & DID Document (Published Data)</h3>
+                <h3 class="text-xl font-bold text-gray-900 mt-4 mb-4">University Key & DID Document (Published Data)</h3>
                 
                 <div id="key-generation-container" class="grid grid-cols-2 gap-4 mb-4">
                     <div class="key-box">
                         <p class="key-label accent-color">University DID (The Address)</p>
-                        <code id="issuer-did" class="key-value text-white">Awaiting Generation...</code>
+                        <code id="issuer-did" class="key-value text-gray-800">Awaiting Generation...</code>
                     </div>
                     <div class="key-box">
                         <p class="key-label accent-color">University Public Key (The Fingerprint)</p>
-                        <code id="issuer-public-key" class="key-value text-white">Awaiting Generation...</code>
+                        <code id="issuer-public-key" class="key-value text-gray-800">Awaiting Generation...</code>
                     </div>
                     <div class="key-box">
                         <p class="key-label accent-color">Student DID (The Holder)</p>
-                        <code id="holder-did" class="key-value text-white">Awaiting Generation...</code>
+                        <code id="holder-did" class="key-value text-gray-800">Awaiting Generation...</code>
                     </div>
                     <div class="key-box">
                         <p class="key-label accent-color private-key-warning">University Private Key (The Secret)</p>
-                        <code id="issuer-private-key" class="key-value text-red-400">HIDDEN AND NEVER SHARED (Simulation: Click 'GENERATE' to see)</code>
+                        <code id="issuer-private-key" class="key-value text-red-600">HIDDEN AND NEVER SHARED (Simulation: Click 'GENERATE' to see)</code>
                     </div>
                 </div>
 
-                <p class="text-sm font-semibold accent-color mb-2">Simulated DID Document (The public, on-chain record that is RESOLVED):</p>
-                <pre id="issuer-did-doc" class="console-log p-4 rounded-lg text-xs">
+                <p class="text-sm font-semibold accent-color mb-2">Simulated DID Document (The public, on-chain record that is **RESOLVED**):</p>
+                <pre id="issuer-did-doc" class="console-log p-4 rounded-lg text-sm">
 {
     "status": "Click 'GENERATE & Publish DID' to create and publish the DID Document."
 }</pre>
             </div>
 
             <div id="tab-wallet" class="tab-content hidden">
-                <h3 class="text-xl font-bold text-white mt-4 mb-4">Holder's Wallet: Verifiable Credential</h3>
+                <h3 class="text-xl font-bold text-gray-900 mt-4 mb-4">Holder's Wallet: Verifiable Credential</h3>
                 <p class="text-sm font-semibold accent-color mb-2">VC (Digital Diploma) - Stored in JWT format:</p>
-                <div id="holder-vc-display" class="text-xs break-all text-gray-300 font-mono card p-4">Awaiting Credential Issuance...</div>
+                <div id="holder-vc-display" class="text-sm break-all text-gray-700 font-mono card p-4 border border-gray-300">Awaiting Credential Issuance...</div>
                 
                 <p class="text-sm font-semibold accent-color mt-6 mb-2">VC Payload (The Data Inside):</p>
-                <pre id="vc-payload-display" class="console-log p-4 rounded-lg text-xs">Awaiting Payload...</pre>
+                <pre id="vc-payload-display" class="console-log p-4 rounded-lg text-sm">Awaiting Payload...</pre>
             </div>
 
             <div id="tab-console" class="tab-content hidden">
-                <h3 class="text-xl font-bold text-white mt-4 mb-4">Verification Console (<span class="text-gray-400">Job Site View</span>)</h3>
+                <h3 class="text-xl font-bold text-gray-900 mt-4 mb-4">Verification Console (<span class="text-gray-500">Job Site View</span>)</h3>
                 <div id="console" class="console-log p-4 rounded-lg text-sm">
                     <p class="text-gray-500">Welcome to the Demo. Click "GENERATE & Publish DID" to start the flow.</p>
                 </div>
             </div>
 
-            <button onclick="resetDemo()" class="w-full mt-4 py-2 rounded-lg text-sm text-gray-400 border border-gray-700 hover:bg-gray-700 transition">
+            <button onclick="resetDemo()" class="w-full mt-4 py-2 rounded-lg text-sm text-gray-600 border border-gray-400 hover:bg-gray-100 transition">
                 <i class="fas fa-undo mr-2"></i> Reset Demo
             </button>
         </div>
@@ -145,31 +237,37 @@
         //           I. DATA & STATE MANAGEMENT
         // ===============================================
 
+        // تجميع كل المتغيرات في كائن واحد (state) لسهولة الإدارة
         let state = {
             issuerDID: null,
             holderDID: null,
             issuerPublicKey: null,
             issuerPrivateKey: null,
             holderVC: null, // JWT string
-            resolvedPublicKey: null, 
+            resolvedPublicKey: null, // المفتاح العام الذي يحصل عليه المدقق عبر Resolution
         };
 
         // ===============================================
         //          II. CRYPTOGRAPHIC UTILITIES
         // ===============================================
 
-        
+        // دالة مساعدة لإنشاء معرفات عشوائية قصيرة (محاكاة DID)
         const generateSimpleId = (prefix) => `${prefix}:example:${Math.random().toString(36).substring(2, 12)}...`;
 
-       
+        // دالة مساعدة لإنشاء مفتاح عشوائي طويل (محاكاة Key)
         const generateSimpleKey = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + '...';
 
-        
+        // Base64Url Encode (تشفير آمن للعناوين)
         const base64UrlEncode = (str) => {
             return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
         };
 
-        
+        /**
+         * محاكاة توقيع الشهادة (VC) باستخدام مفتاح المُصدر الخاص.
+         * تم تعديل حمولة البيانات هنا لتعكس طلب المستخدم (بنت IT لم تتخرج).
+         * @param {string} privateKey - المفتاح الخاص للجامعة.
+         * @returns {{jwt: string, payload: object}} الـ VC الموقعة وحمولة البيانات.
+         */
         const signCredential = (privateKey) => {
             const header = { alg: 'ES256K', typ: 'jwt', kid: `${state.issuerDID}#keys-1` };
             const payload = {
@@ -178,22 +276,22 @@
                 nbf: Math.floor(Date.now() / 1000), 
                 vc: {
                     '@context': ['https://www.w3.org/2018/credentials/v1'],
-                    type: ['VerifiableCredential', 'StudentStatus'],
+                    type: ['VerifiableCredential', 'StudentStatus'], // تم تغيير النوع ليناسب حالة عدم التخرج
                     credentialSubject: {
                         id: state.holderDID,
                         name: 'Sarah M.', // اسم مفترض للطالبة
-                        major: 'B.S. Information Technology', 
+                        major: 'B.S. Information Technology', // تخصص تكنولوجيا المعلومات
                         status: 'Enrolled - Year 3', // لم تتخرج بعد
                         university: 'Decentralized Tech University'
                     }
                 }
             };
             
-           
+            // 1. تشفير Header و Payload
             const headerBase64 = base64UrlEncode(JSON.stringify(header));
             const payloadBase64 = base64UrlEncode(JSON.stringify(payload));
             
-           
+            // 2. حساب التوقيع (Signature) باستخدام المفتاح الخاص (Private Key)
             const signatureSeed = headerBase64 + payloadBase64 + privateKey;
             const signature = 'CRYPTO_SIG_' + base64UrlEncode(signatureSeed).substring(0, 15);
             
@@ -203,7 +301,11 @@
             };
         };
 
-        
+        /**
+         * محاكاة التحقق من صحة الشهادة (VC) باستخدام المفتاح العام المُحلول.
+         * @param {string} vc - الـ VC الموقعة (JWT).
+         * @param {string} publicKey - المفتاح العام المُحلول (Resolved Public Key).
+         */
         const verifyCredential = (vc, publicKey) => {
             try {
                 const parts = vc.split('.');
@@ -247,11 +349,11 @@
         const log = (message, status = 'info') => {
             showTab('console');
             const consoleEl = document.getElementById('console');
-            let statusClass = 'text-gray-400';
-            if (status === 'success') statusClass = 'status-success';
-            if (status === 'error') statusClass = 'status-error';
-            if (status === 'accent') statusClass = 'accent-color';
-            if (status === 'highlight') statusClass = 'status-highlight';
+            let statusClass = 'text-gray-600';
+            if (status === 'success') statusClass = 'status-success font-semibold';
+            if (status === 'error') statusClass = 'status-error font-semibold';
+            if (status === 'accent') statusClass = 'accent-color font-semibold';
+            if (status === 'highlight') statusClass = 'status-highlight font-semibold';
 
             const p = document.createElement('p');
             p.className = statusClass + ' mb-1 leading-tight';
@@ -378,7 +480,9 @@
             showTab('wallet');
         }
 
-       
+        /**
+         * خطوة 3: تقديم الـ VC وبدء عملية حل الـ DID (Resolution).
+         */
         function handleResolveDidAndPresentVC() {
             if (!state.holderVC) {
                 log('Error: Wallet is empty. Please issue a VC first.', 'error');
@@ -394,7 +498,7 @@
             log(`ACTION: Verifier extracts Issuer DID (${state.issuerDID}) from the VC payload.`, 'info');
             log(`ACTION: Verifier begins DID RESOLUTION (querying the Registry) to find the public key...`, 'highlight');
 
-           
+            // محاكاة حل الـ DID (Fetching the DID Document)
             const resolvedDIDDocument = JSON.parse(document.getElementById('issuer-did-doc').textContent);
             state.resolvedPublicKey = resolvedDIDDocument.verificationMethod[0].publicKeyBase58;
 
@@ -406,7 +510,9 @@
             showTab('console');
         }
 
-        
+        /**
+         * خطوة 4: التحقق من التوقيع باستخدام المفتاح العام المُحلول.
+         */
         function handleVerifyVC() {
             if (!state.holderVC || !state.resolvedPublicKey) {
                 log('Error: Verification failed. VC not presented or DID not resolved.', 'error');
@@ -439,7 +545,7 @@
         // ===============================================
 
         function resetDemo() {
-           
+            // إعادة ضبط كائن الحالة
             state = {
                 issuerDID: null,
                 holderDID: null,
